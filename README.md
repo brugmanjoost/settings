@@ -1,4 +1,6 @@
-﻿# Settings
+﻿![Node.js CI](https://github.com/brugmanjoost/settings/actions/workflows/nodejs-ci.yml/badge.svg)
+
+# Settings
 
 Read and validate environment variables with built in support for various datatypes such as booleans, urls, enums, and listed items. Settings is exposed as a CommonJS module. To integrates with dotenv simply load dotenv before you read your first setting through **settings**.
 
