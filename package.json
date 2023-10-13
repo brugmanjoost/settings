@@ -1,0 +1,38 @@
+{
+  "name": "@brugmanjoost/settings",
+  "version": "0.0.1",
+  "description": "Read environment variables in a structured manner with basic validation and support for value lists, all with zero dependencies.",
+  "author": "Joost Brugman <codingjoost@brugmanholding.com>",
+  "license": "MIT",
+  "keywords": [
+    "process.env",
+    "environment",
+    "settings"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "jest"
+  },
+  "homepage": "https://github.com/brugmanjoost/settings",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brugmanjoost/settings"
+  },
+  "bugs": {
+    "url": "https://github.com/brugmanjoost/settings/issues"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.5",
+    "@types/node": "^20.8.4",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  }
+}
