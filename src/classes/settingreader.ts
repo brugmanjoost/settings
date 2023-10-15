@@ -22,6 +22,8 @@ export abstract class SettingReader<T> {
     #maxValue:              /**/ number | Date;
     #match?:                /**/ RegExp;
     #enumValues:            /**/ T[];
+    #treatEmptyAsNotPresent:/**/ boolean;
+    #isOptional:            /**/ boolean;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -31,19 +33,21 @@ export abstract class SettingReader<T> {
     //
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     constructor(name: string, opts?: SettingReaderOptions<T>) {
-        opts                /**/ = opts ?? {}
-        this.#name          /**/ = name;
-        this.#delimiter     /**/ = opts.delimiter       /**/ ?? ',';            // Delimiter
-        this.#quote         /**/ = opts.quote           /**/ ?? '"';            // Quote symbol
-        this.#escape        /**/ = opts.escape          /**/ ?? '\\';           // Escape character
-        this.#minItems      /**/ = opts.minItems        /**/ ?? 0;              // Minimum number of items to read.
-        this.#maxItems      /**/ = opts.maxItems        /**/ ?? Infinity;       // Maximum number of items to read.
-        this.#minLength     /**/ = opts.minLength       /**/ ?? 0;              // Constraint: Minimum length for string values
-        this.#maxLength     /**/ = opts.maxLength       /**/ ?? Infinity;       // Constraint: Maximum length for string values
-        this.#minValue      /**/ = opts.minValue        /**/ ?? -Infinity;      // Constraint: Minimum value for integer and float values
-        this.#maxValue      /**/ = opts.maxValue        /**/ ?? Infinity;       // Constraint: Maximum value for integer and float values
-        this.#match         /**/ = opts.match;                                  // Constraint: A regular expression that must match a value
-        this.#enumValues    /**/ = opts.enumValues      /**/ ?? [];             // Constraint: A fixed number of possible values
+        opts                        /**/ = opts ?? {}
+        this.#name                  /**/ = name;
+        this.#delimiter             /**/ = opts.delimiter               /**/ ?? ',';        // Delimiter
+        this.#quote                 /**/ = opts.quote                   /**/ ?? '"';        // Quote symbol
+        this.#escape                /**/ = opts.escape                  /**/ ?? '\\';       // Escape character
+        this.#minItems              /**/ = opts.minItems                /**/ ?? 0;          // Minimum number of items to read.
+        this.#maxItems              /**/ = opts.maxItems                /**/ ?? Infinity;   // Maximum number of items to read.
+        this.#minLength             /**/ = opts.minLength               /**/ ?? 0;          // Constraint: Minimum length for string values
+        this.#maxLength             /**/ = opts.maxLength               /**/ ?? Infinity;   // Constraint: Maximum length for string values
+        this.#minValue              /**/ = opts.minValue                /**/ ?? -Infinity;  // Constraint: Minimum value for integer and float values
+        this.#maxValue              /**/ = opts.maxValue                /**/ ?? Infinity;   // Constraint: Maximum value for integer and float values
+        this.#match                 /**/ = opts.match;                                      // Constraint: A regular expression that must match a value
+        this.#enumValues            /**/ = opts.enumValues              /**/ ?? [];         // Constraint: A fixed number of possible values
+        this.#treatEmptyAsNotPresent/**/ = opts.treatEmptyAsNotPresent  /**/ ?? true;       // Converts empty values into undefined before checking if the value isOptional
+        this.#isOptional            /**/ = opts.isOptional              /**/ ?? false;      // Allowance: Does not throw missing if value is not present and defaultValue is undefined.
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,9 +136,10 @@ export abstract class SettingReader<T> {
     //              of convertRawValueToUsableValue.
     //
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public getValue(defaultValue?: T): T {
-        let rawValue = process.env[this.#name];
-        if ((rawValue === undefined) || (rawValue === '')) {
+    public getValue(defaultValue?: T): T | undefined {
+        let rawValue = this.#emptyToUndefined(process.env[this.#name]);
+        if (rawValue === undefined) {
+            if (this.#isOptional) return undefined;
             if (defaultValue === undefined) this.missingValueError();
             return defaultValue;
         } else {
@@ -149,15 +154,31 @@ export abstract class SettingReader<T> {
     // Description: Gets a list of T values as an array. As input the environment variable is interpreted as a CSV line.
     //
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public getList(defaultValue?: T[]): T[] {
-        let rawValue = process.env[this.#name];
-
-        if ((rawValue === undefined) || (rawValue === '')) {
+    public getList(defaultValue?: T[]): T[] | undefined {
+        let rawValue = this.#emptyToUndefined(process.env[this.#name]);
+        if (rawValue === undefined) {
+            if (this.#isOptional) return undefined;
             if (defaultValue === undefined) this.missingValueError();
             return defaultValue;
         } else {
             return this.decodeCSVLine(rawValue).map((valueFromList: string) => this.convertRawValueToUsableValue(valueFromList));
         }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Function:    #emptyToUndefined
+    //
+    // Description: On some systems setting an environment variable to empty deletes it, yet in other environments the same empty string is passed
+    //              as a value. Therefore, by default we treat empty strings as undefined. Making them undefined enters them into being overruled by
+    //              defaultValue at a later stage.
+    //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    #emptyToUndefined(rawValue?: string): string | undefined {
+        if (rawValue !== '') return rawValue;
+        return this.#treatEmptyAsNotPresent
+            ? undefined
+            : rawValue;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

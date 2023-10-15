@@ -22,6 +22,8 @@ class SettingReader {
     #maxValue;
     #match;
     #enumValues;
+    #treatEmptyAsNotPresent;
+    #isOptional;
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //
     // Function:    constructor
@@ -43,6 +45,8 @@ class SettingReader {
         this.#maxValue /**/ = opts.maxValue /**/ ?? Infinity; // Constraint: Maximum value for integer and float values
         this.#match /**/ = opts.match; // Constraint: A regular expression that must match a value
         this.#enumValues /**/ = opts.enumValues /**/ ?? []; // Constraint: A fixed number of possible values
+        this.#treatEmptyAsNotPresent /**/ = opts.treatEmptyAsNotPresent /**/ ?? true; // Converts empty values into undefined before checking if the value isOptional
+        this.#isOptional /**/ = opts.isOptional /**/ ?? false; // Allowance: Does not throw missing if value is not present and defaultValue is undefined.
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -134,8 +138,10 @@ class SettingReader {
     //
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     getValue(defaultValue) {
-        let rawValue = process.env[this.#name];
-        if ((rawValue === undefined) || (rawValue === '')) {
+        let rawValue = this.#emptyToUndefined(process.env[this.#name]);
+        if (rawValue === undefined) {
+            if (this.#isOptional)
+                return undefined;
             if (defaultValue === undefined)
                 this.missingValueError();
             return defaultValue;
@@ -152,8 +158,10 @@ class SettingReader {
     //
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     getList(defaultValue) {
-        let rawValue = process.env[this.#name];
-        if ((rawValue === undefined) || (rawValue === '')) {
+        let rawValue = this.#emptyToUndefined(process.env[this.#name]);
+        if (rawValue === undefined) {
+            if (this.#isOptional)
+                return undefined;
             if (defaultValue === undefined)
                 this.missingValueError();
             return defaultValue;
@@ -161,6 +169,22 @@ class SettingReader {
         else {
             return this.decodeCSVLine(rawValue).map((valueFromList) => this.convertRawValueToUsableValue(valueFromList));
         }
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Function:    #emptyToUndefined
+    //
+    // Description: On some systems setting an environment variable to empty deletes it, yet in other environments the same empty string is passed
+    //              as a value. Therefore, by default we treat empty strings as undefined. Making them undefined enters them into being overruled by
+    //              defaultValue at a later stage.
+    //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    #emptyToUndefined(rawValue) {
+        if (rawValue !== '')
+            return rawValue;
+        return this.#treatEmptyAsNotPresent
+            ? undefined
+            : rawValue;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //

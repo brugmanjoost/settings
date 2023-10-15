@@ -10,6 +10,8 @@ export interface SettingReaderOptions<T> {
     maxValue?: /**/ number | Date;
     match?: RegExp;
     enumValues?: T[];
+    treatEmptyAsNotPresent?: boolean;
+    isOptional?: boolean;
 }
 export interface SettingReaderOptionsForURL extends SettingReaderOptions<URL> {
     acceptedProtocols?: string[];

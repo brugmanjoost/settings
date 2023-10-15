@@ -76,6 +76,22 @@ describe('String list values', () => {
 
     // Special Constraints
 
+    expectValue({
+        it: 	        /**/ 'Should get an undefined value if optional and value is missing while defaultValue is not set.',
+        value:          /**/ undefined,
+        defaultValue:   /**/ undefined,
+        opts:           /**/ { isOptional: true },
+        expectValue:    /**/ undefined,
+    });
+
+    expectValue({
+        it: 	        /**/ 'Should get an undefined value if optional and value is \'\' while defaultValue is not set and we treatEmptyAsNotPresent.',
+        value:          /**/ '',
+        defaultValue:   /**/ undefined,
+        opts:           /**/ { isOptional: true, treatEmptyAsNotPresent: true },
+        expectValue:    /**/ undefined,
+    });
+
     expectError({
         it: 	        /**/ 'Should throw an invalid error if one of the items in the list does not meet the requirements.',
         value:          /**/ 'Hello, World',

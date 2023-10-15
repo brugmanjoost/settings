@@ -77,6 +77,22 @@ describe('String values', () => {
     // Special Constraints
 
     expectValue({
+        it: 	        /**/ 'Should get an undefined value if optional and value is missing while defaultValue is not set.',
+        value:          /**/ undefined,
+        defaultValue:   /**/ undefined,
+        opts:           /**/ { isOptional: true },
+        expectValue:    /**/ undefined,
+    });
+
+    expectValue({
+        it: 	        /**/ 'Should get an undefined value if optional and value is \'\' while defaultValue is not set and we treatEmptyAsNotPresent.',
+        value:          /**/ '',
+        defaultValue:   /**/ undefined,
+        opts:           /**/ { isOptional: true, treatEmptyAsNotPresent: true },
+        expectValue:    /**/ undefined,
+    });
+
+    expectValue({
         it: 	        /**/ 'Should get the value if it matches a regular expression.',
         value:          /**/ 'Old McDonald had a farm.',
         defaultValue:   /**/ undefined,

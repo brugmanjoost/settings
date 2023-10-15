@@ -47,9 +47,11 @@ When reading an environment variable you can pass the following options through 
  - **`delimiter:`** A csv style delimeter token to separate out multiple values in a list. Defaults to **`,`**. Affects all list variants.
  - **`quote:`** A csv style quote token to identify quoted values in a list. Defaults to `"`. Affects all list variants.
  - **`escape:`** A csv style escape token to escape quotes in quotes values. Defaults to `\`. Affects all list variants.
+ - **`treatEmptyAsNotPresent`** On Windows command prompt setting an environment variable to an empty string ("") equates to deleting it. Other environments (e.g. bash, powershell, dotenv or Azure App Service settings) treat an empty value for wat it is: a string with value "". `treatEmptyAsNotPresent` defines how to treat these empty strings in a uniform way. It defaults to `true` where an empty string is interpreted as the value not being present. Reading it then returns the `defaultValue`. If set to `false` an empty string is accepted as a value and interpreted by the getter function for the dataformat retrieved. Note that many getters will throw an error if passed an empty string. E.g. it is not possible to convert an empty string into an integer.
+ - **`isOptional`**: If set to true the getter returns `undefined` and does not throw a EnvVariableMissingError error under the following conditions: A) the value is not present and the defaultValue is undefined. B) the value is "", treatEmptyAsNotPresent is true and the defaultValue is undefined.
 
 ## Using default values
-A **Settings.EnvVariableMissingError** error is thrown if VAR does not exist or is an empty string (''). To prevent exceptions a default value may be provided like so.
+By default **Settings.EnvVariableMissingError** error is thrown if VAR does not exist or is an empty string (''). To prevent exceptions a default value may be provided like so.
 
     // C:\> set VAR=
     value = Settings.string('VAR', 'Some default value');   // value == 'Some default value'
@@ -58,6 +60,20 @@ Note that default values are to be specified in the datatype associated with the
 
 	// C:\> set VAR=
     value = Settings.date('VAR', new Date('2023-10-12T14:24:15.000Z')); // value == Thu Oct 12 2023 16:24:15 GMT+0200
+
+Allowing an optional value that returns undefined:
+
+	// Remove VAR from environment settings
+    value = Settings.string('VAR', undefined, { isOptional: true });	// value == undefined
+
+Treating an empty string value as undefined requires setting both `treatEmptyAsNotPresent` to `true` (default) and setting `isOptional` to `true`.
+
+	// Add the following line to .env and use dotenv
+	// VAR=
+    value = Settings.string('VAR', undefined, {
+	    treatEmptyAsNotPresent: true,
+	    isOptional: true
+	});	// value == undefined
 
 ## Constraints
 Values are tested for constraints before being returned. Reading a value that does not meet a constraint throws a **Settings.EnvVariableInvalidError**.

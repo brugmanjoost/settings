@@ -3,8 +3,8 @@ export declare abstract class SettingReader<T> {
     #private;
     constructor(name: string, opts?: SettingReaderOptions<T>);
     private decodeCSVLine;
-    getValue(defaultValue?: T): T;
-    getList(defaultValue?: T[]): T[];
+    getValue(defaultValue?: T): T | undefined;
+    getList(defaultValue?: T[]): T[] | undefined;
     protected missingValueError(): never;
     protected invalidValueError(msg: string): never;
     protected summarizeValues(arr: string[] | number[]): string;
