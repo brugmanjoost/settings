@@ -1,4 +1,4 @@
-﻿![Node.js CI](https://github.com/brugmanjoost/settings/actions/workflows/nodejs-ci.yml/badge.svg)
+﻿![Node.js CI](https://github.com/brugmanjoost/settings/actions/workflows/nodejs-ci.yml/badge.svg) [![install size](https://packagephobia.com/badge?p=@brugmanjoost/settings)](https://packagephobia.com/result?p=@brugmanjoost/settings)
 
 # Settings
 
