@@ -1,6 +1,6 @@
 {
   "name": "@brugmanjoost/settings",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Read environment variables in a structured manner with basic validation and support for value lists, all with zero dependencies.",
   "author": "Joost Brugman <codingjoost@brugmanholding.com>",
   "license": "MIT",
